@@ -18,13 +18,13 @@
 
 
 disco <- function(x, factors, distance = FALSE, index = 1, R,
-                  method = c("disco", "discoB", "discoF")) {
+                  method = c("disco", "discoB", "discoF"),blocks=rep(1,n)) {
   ## x is response or Euclidean distance matrix or dist() object factors
   ## is a matrix or data frame of group labels distance=TRUE if x is
   ## distance, otherwise FALSE index is the exponent on distance, in (0,2]
   ## R is number of replicates for test method: use F ratio (default) or
   ## between component (discoB) disco method is currently alias for discoF
-
+  ## blocks is a vector of experimental blocks within which we want to permute treatment arm values
 
   method <- match.arg(method)
   factors <- data.frame(factors)
@@ -49,7 +49,7 @@ disco <- function(x, factors, distance = FALSE, index = 1, R,
     stats[j, 1:4] <- .disco1(trt = trt, dst = dst)
     if (R > 0) {
       b <- boot::boot(data = dst, statistic = .disco1stat, sim = "permutation",
-                      R = R, trt = trt)
+                      R = R, trt = trt, strata=blocks)
       stats[j, 5] <- b$t0
       stats[j, 6] <- (sum(b$t > b$t0) + 1)/(R + 1)
     } else {
@@ -84,7 +84,7 @@ disco <- function(x, factors, distance = FALSE, index = 1, R,
   e
 }
 
-disco.between <- function(x, factors, distance = FALSE, index = 1, R) {
+disco.between <- function(x, factors, distance = FALSE, index = 1, R,blocks=rep(1,n)) {
   ## disco test based on the between-sample component similar to disco
   ## except that 'disco' test is based on the F ratio disco.between test
   ## for one factor (balanced) is asymptotically equivalent to k-sample E
@@ -109,7 +109,7 @@ disco.between <- function(x, factors, distance = FALSE, index = 1, R) {
   trt <- factors[, 1]
   if (R > 0) {
     b <- boot::boot(data = dst, statistic = .disco1Bstat, sim = "permutation",
-                    R = R, trt = trt)
+                    R = R, trt = trt, strata=blocks)
     between <- b$t0
     reps <- b$t
     pval <- mean(reps >= between)
