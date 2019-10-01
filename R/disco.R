@@ -18,7 +18,7 @@
 
 
 disco <- function(x, factors, distance = FALSE, index = 1, R,
-                  method = c("disco", "discoB", "discoF"),blocks=rep(1,n)) {
+                  method = c("disco", "discoB", "discoF"),blocks=NULL) {
   ## x is response or Euclidean distance matrix or dist() object factors
   ## is a matrix or data frame of group labels distance=TRUE if x is
   ## distance, otherwise FALSE index is the exponent on distance, in (0,2]
@@ -43,6 +43,8 @@ disco <- function(x, factors, distance = FALSE, index = 1, R,
 
   stats <- matrix(0, nfactors, 6)
   colnames(stats) <- c("Trt", "Within", "df1", "df2", "Stat", "p-value")
+
+  if(is.null(blocks)){ blocks <- rep(1,N) }
 
   for (j in 1:nfactors) {
     trt <- factors[, j]
@@ -84,7 +86,7 @@ disco <- function(x, factors, distance = FALSE, index = 1, R,
   e
 }
 
-disco.between <- function(x, factors, distance = FALSE, index = 1, R,blocks=rep(1,n)) {
+disco.between <- function(x, factors, distance = FALSE, index = 1, R,blocks=NULL) {
   ## disco test based on the between-sample component similar to disco
   ## except that 'disco' test is based on the F ratio disco.between test
   ## for one factor (balanced) is asymptotically equivalent to k-sample E
@@ -105,6 +107,8 @@ disco.between <- function(x, factors, distance = FALSE, index = 1, R,blocks=rep(
     stop("distance==TRUE but first argument is not distance")
   if (!isTRUE(all.equal(index, 1)))
     dst <- dst^index
+
+  if(is.null(blocks)){ blocks <- rep(1,N) }
 
   trt <- factors[, 1]
   if (R > 0) {
